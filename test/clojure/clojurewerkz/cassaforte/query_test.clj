@@ -12,7 +12,9 @@
       (.getQueryString)
       (clojure.string/replace "\t" "  ")
       (clojure.string/replace #"^\n" "")
-      (clojure.string/replace #"^\s+" "")))
+      (clojure.string/replace #"^\s+" "")
+      (clojure.string/replace #"\s+$" "")
+      (clojure.string/replace #"\n$" "")))
 
 (defmacro renders-to
   [query result]
@@ -571,20 +573,17 @@
                         (and-keys-of-column "baz"))))))
 
 (deftest test-drop-keyspace
-  (is (= "DROP KEYSPACE foo;"
+  (is (= "DROP KEYSPACE foo"
          (normalize-string
           (drop-keyspace "foo"))))
-  (is (= "DROP KEYSPACE IF EXISTS foo;"
+  (is (= "DROP KEYSPACE IF EXISTS foo"
          (normalize-string
           (drop-keyspace "foo" (if-exists))))))
 
 (deftest test-create-keyspace
-  (is (= "CREATE KEYSPACE IF NOT EXISTS foo;"
-         (normalize-string
-          (create-keyspace "foo"
-                           (if-not-exists)))))
-
-  (is (= "CREATE KEYSPACE IF NOT EXISTS foo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
+  (is (= "CREATE KEYSPACE IF NOT EXISTS foo
+  WITH
+    REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1}"
          (normalize-string
           (create-keyspace "foo"
                            (with
@@ -594,7 +593,10 @@
                            (if-not-exists))))))
 
 (deftest test-alter-keyspace
-  (is (= "ALTER KEYSPACE new_cql_keyspace WITH replication = {'class': 'NetworkTopologyStrategy', 'dc1': 1, 'dc2': 2} AND DURABLE_WRITES = false;"
+  (is (= "ALTER KEYSPACE new_cql_keyspace
+  WITH
+    REPLICATION = {'class': 'NetworkTopologyStrategy', 'dc1': 1, 'dc2': 2}
+    AND DURABLE_WRITES = false"
          (normalize-string
           (alter-keyspace "new_cql_keyspace"
                           (with {:durable-writes false
@@ -603,7 +605,9 @@
                                                             "dc2"   2)})))))
 
 
-  (is (= "ALTER KEYSPACE foo WITH replication = {'class': 'SimpleStrategy', 'replication_factor': 1};"
+  (is (= "ALTER KEYSPACE foo
+  WITH
+    REPLICATION = {'class': 'SimpleStrategy', 'replication_factor': 1}"
          (normalize-string
           (alter-keyspace "foo"
                           (with

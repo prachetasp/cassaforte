@@ -108,9 +108,9 @@
 (defn drop-table
   "Drops a table: this results in the immediate, irreversible removal of a table, including
   all data in it."
-  [^Session session ks]
+  [^Session session & ks]
   (cc/execute session
-              (query/drop-table ks)))
+              (apply query/drop-table ks)))
 
 (defn use-keyspace
   "Takes an existing keyspace name as argument and set it as the per-session current working keyspace.
